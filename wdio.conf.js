@@ -1,9 +1,19 @@
+import fs from 'fs';
+import path from 'path';
+import allure from '@wdio/allure-reporter';
+
+
 export const config = {
-    //
-    // ====================
-    // Runner Configuration
-    // ====================
-    // WebdriverIO supports running e2e tests as well as unit and component tests.
+
+    // after: async function (result, capabilities, specs) {
+    //     // ไม่ให้ปิดแอพเมื่อการทดสอบเสร็จ
+    //     console.log('Test complete. App will stay open.');
+    
+    //     // ใช้ pause หรือคำสั่งที่ทำให้แอพค้าง
+    //     await browser.pause(99999999); // ทำให้แอพค้างไว้ไม่ปิด
+    //   },
+      
+
     runner: 'local',
     hostname: 'localhost',
     port: 4723,
@@ -14,13 +24,35 @@ export const config = {
         'appium:deviceName': 'Xiaomi 10T Pro',
         'appium:platformVersion': '12',
         'appium:automationName': 'UiAutomator2',
-        'appium:appPackage': 'com.android.settings',
-        'appium:appActivity': '.Settings',
-        'appium:noReset': true
+        'appium:appPackage': 'co.notero.litejam',
+        'appium:appActivity': '.MainActivity',
+        'appium:noReset': false
     }],
+     services: [
+    // Service ตัวที่ 1: จัดการ Appium Server พร้อมตัวเลือกเสริม
+    ['appium', {
+        args: {
+            'relaxed-security': true,
+        }
+    }],
+
+    // Service ตัวที่ 2: จัดการเปรียบเทียบภาพ
+    [
+            "visual",
+            {
+                // Some options, see the docs for more
+                baselineFolder: path.join(process.cwd(), "tests", "baseline"),
+                formatImageName: "{tag}-{logName}-{width}x{height}",
+                screenshotPath: path.join(process.cwd(), "tmp"),
+                savePerInstance: true,
+                blockOutStatusBar: true,
+                // ... more options
+            },
+        ],
+],
     specs: [
-        './checkbettery.js'
-    ],
+  './test/specs/local/LitejamLocal.e2e.js',
+        ],
     // Patterns to exclude.
     exclude: [
         // 'path/to/excluded/files'
@@ -119,11 +151,14 @@ export const config = {
     // Test reporter for stdout.
     // The only one supported by default is 'dot'
     // see also: https://webdriver.io/docs/dot-reporter
-    reporters: [['allure', {
-        outputDir: 'allure-results',
-        disableWebdriverStepsReporting: true,
-        disableWebdriverScreenshotsReporting: true,
-    }]],
+    reporters: [
+        'spec',
+        ['allure', {
+          outputDir: 'allure-results',
+          disableWebdriverStepsReporting: false,
+          disableWebdriverScreenshotsReporting: false,
+        }]
+      ],
 
     // Options to be passed to Mocha.
     // See the full list at http://mochajs.org/
